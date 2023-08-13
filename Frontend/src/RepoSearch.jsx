@@ -6,6 +6,7 @@ const RepoSearch = () => {
   // * track the input value and the result
   const [repoLink, setRepoLink] = useState("");
   const [avgTimeToMerge, setAvgTimeToMerge] = useState(null);
+  const token = import.meta.env.VITE_GITHUB_ACCESS_TOKEN;
 
   // * update the state whenver the input value changes
   const handleInputChange = (event) => {
@@ -38,7 +39,11 @@ const RepoSearch = () => {
   //fetch all pages of closed PRS
   const fetchAllClosedPRs = async (url) => {
     try {
-      const response = await axios.get(url);
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `token ${token}`
+        }
+      });
   
       // Parse link header to get the pagination links
       const links = parseLinkHeader(response.headers.link);
