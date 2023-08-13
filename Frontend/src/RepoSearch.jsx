@@ -6,7 +6,9 @@ const RepoSearch = () => {
   // * track the input value and the result
   const [repoLink, setRepoLink] = useState("");
   const [avgTimeToMerge, setAvgTimeToMerge] = useState(null);
+  const [loading, setLoading] = useState(false);
   const token = import.meta.env.VITE_GITHUB_ACCESS_TOKEN;
+  // console.log(token);
 
   // * update the state whenver the input value changes
   const handleInputChange = (event) => {
@@ -39,6 +41,7 @@ const RepoSearch = () => {
   //fetch all pages of closed PRS
   const fetchAllClosedPRs = async (url) => {
     try {
+      setLoading(true);
       const response = await axios.get(url, {
         headers: {
           Authorization: `token ${token}`
@@ -58,6 +61,7 @@ const RepoSearch = () => {
       return response.data;
     } catch (error) {
       console.error("Error fetching paginated data:", error);
+      setLoading(false);
       return [];
     }
   };
@@ -66,6 +70,7 @@ const RepoSearch = () => {
 //       * and then calculate the average 
   const fetchTimeToMerge = async () => {
     try {
+      setLoading(true);
       // Extract owner and repo from the repoLink
       const matches = repoLink.match(/github\.com\/([^\/]+)\/([^\/]+)/);
       if (!matches) {
@@ -95,8 +100,10 @@ const RepoSearch = () => {
       const average = total / timesToMerge.length ? total / timesToMerge.length : 0;
       //update the state with the computed avg time to merge
       setAvgTimeToMerge(average);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
+      setLoading(false);
     }
   };
 
@@ -117,6 +124,9 @@ const RepoSearch = () => {
         />
         <button type="submit">Fetch Data</button>
       </form>
+      {loading && ( 
+        <div>Loading...</div>
+      )}
       {avgTimeToMerge !== null && (
         //format avgTimeToMerge to have exactly 2 decimal places
         <div>Average Time to Merge: {avgTimeToMerge.toFixed(2)} hours</div>
