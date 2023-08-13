@@ -5,6 +5,7 @@ function App() {
 
   return (
     <>
+    <h2>Average Time To Merge</h2>
       <RepoSearch></RepoSearch>
     </>
   )
