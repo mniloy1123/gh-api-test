@@ -12,6 +12,51 @@ const RepoSearch = () => {
     setRepoLink(event.target.value);
   };
 
+  //parse link header which provides pagination info
+  const parseLinkHeader = (header) => {
+    if (!header || header.length === 0) return null;
+
+    const links = {};
+
+    //split parts by comma (extract individual links)
+    const parts = header.split(',');
+
+    // For each link, extract the URL and the relation type 
+    //(e.g. next, prev, last, first)
+    for (let i = 0; i < parts.length; i++) {
+      const section = parts[i].split(';');
+      if (section.length !== 2) {
+        throw new Error("section could not be split on ';'");
+      }
+      const url = section[0].replace(/<(.*)>/, '$1').trim();
+      const name = section[1].replace(/rel="(.*)"/, '$1').trim();
+      links[name] = url;
+    }
+    return links;
+  }
+
+  //fetch all pages of closed PRS
+  const fetchAllClosedPRs = async (url) => {
+    try {
+      const response = await axios.get(url);
+  
+      // Parse link header to get the pagination links
+      const links = parseLinkHeader(response.headers.link);
+      
+      // If there's a next page, fetch it recursively
+      if (links && links.next) {
+        const nextPageData = await fetchAllClosedPRs(links.next);
+        return [...response.data, ...nextPageData];
+      }
+  
+      // If no next page, return the current page data
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching paginated data:", error);
+      return [];
+    }
+  };
+
 //    * Calculate the time to merge for each closed pull requests
 //       * and then calculate the average 
   const fetchTimeToMerge = async () => {
@@ -25,23 +70,25 @@ const RepoSearch = () => {
       const owner = matches[1];
       const repo = matches[2];
 
-      const response = await axios.get(
+      //all closed PRs for the repo
+      const response = await fetchAllClosedPRs(
         `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed`
       );
 
-      // Filter pull requests that were merged 
-      const mergedPRs = response.data.filter((pr) => pr.merged_at !== null);
+      // Filter out PRs that were not merged
+      const mergedPRs = response.filter((pr) => pr.merged_at !== null);
 
+      //map through each PR to calculate the time taken to merge it
       const timesToMerge = mergedPRs.map((pr) => {
         const createdAt = new Date(pr.created_at);
         const mergedAt = new Date(pr.merged_at);
         // Convert milliseconds to hours
         return (mergedAt - createdAt) / (1000 * 60 * 60); 
       });
-
+      //total time taken to merge all PRs
       const total = timesToMerge.reduce((acc, curr) => acc + curr, 0);
       const average = total / timesToMerge.length ? total / timesToMerge.length : 0;
-
+      //update the state with the computed avg time to merge
       setAvgTimeToMerge(average);
     } catch (error) {
       console.error("Error fetching data:", error);
