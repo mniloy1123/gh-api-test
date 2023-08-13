@@ -44,3 +44,6 @@ input {
   height: 50px;
   width: 800px;
 }
+button {
+  margin-top: 10px;
+}
