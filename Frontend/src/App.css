@@ -47,3 +47,12 @@ input {
 button {
   margin-top: 10px;
 }
+
+.average-time {
+  font-weight: bold;
+  color: palevioletred;
+  font-size: 1.2rem;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
