@@ -131,7 +131,7 @@ const RepoSearch = () => {
       )}
       {avgTimeToMerge !== null && (
         //format avgTimeToMerge to have exactly 2 decimal places
-        <div>Average Time to Merge: {avgTimeToMerge.toFixed(2)} hours</div>
+        <div className="average-time">Average Time to Merge: {avgTimeToMerge.toFixed(2)} hours</div>
       )}
     </div>
   );
