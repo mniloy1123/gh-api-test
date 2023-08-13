@@ -71,6 +71,8 @@ const RepoSearch = () => {
   const fetchTimeToMerge = async () => {
     try {
       setLoading(true);
+      //clear previous result when loading starts
+      setAvgTimeToMerge(null); 
       // Extract owner and repo from the repoLink
       const matches = repoLink.match(/github\.com\/([^\/]+)\/([^\/]+)/);
       if (!matches) {
