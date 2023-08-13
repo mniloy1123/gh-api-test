@@ -40,7 +40,7 @@ const RepoSearch = () => {
       });
 
       const total = timesToMerge.reduce((acc, curr) => acc + curr, 0);
-      const average = total / timesToMerge.length;
+      const average = total / timesToMerge.length ? total / timesToMerge.length : 0;
 
       setAvgTimeToMerge(average);
     } catch (error) {
